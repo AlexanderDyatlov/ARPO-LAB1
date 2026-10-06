@@ -60,10 +60,12 @@
 
 
 ### Результаты работы CI/CD:
-<img width="1582" height="283" alt="image" src="https://github.com/user-attachments/assets/93c197bb-ea77-4f9e-8d5f-a09896e31197" />
+
 
 * **Успешное выполнение задач в GitHub Actions:**
+  <img width="1582" height="283" alt="image" src="https://github.com/user-attachments/assets/93c197bb-ea77-4f9e-8d5f-a09896e31197" />
 * **Синхронизированный резервный репозиторий:**
+<img width="1123" height="773" alt="image" src="https://github.com/user-attachments/assets/8b97fae1-a3d6-49c6-8c55-c01d7e837aa9" />
 
 Результаты работы CI/CD:
 Успешное выполнение задач в GitHub Actions:
