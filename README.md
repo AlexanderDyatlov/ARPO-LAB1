@@ -1,163 +1,68 @@
-# Министерство образования Республики Беларусь
-### Учреждение образования «Полоцкий государственный университет имени Евфросинии Полоцкой»
-**Факультет Информационных Технологий**  
-**Кафедра Вычислительных систем и сетей**  
-
 
 ---
 
-**Лабораторная работа №1**
+```markdown
+# Unity 2D Platformer — Build Automation & CI/CD Pipeline
 
-По дисциплине: «Автоматизация разработки и проектирования ПО»
+Репозиторий содержит проект 2D-платформера на Unity с настроенной системой консольной автоматической сборки под WebGL и CI/CD пайплайном на GitHub Actions для верификации структуры и зеркалирования кода.
 
-На тему: «Автоматизация сборки 2D игры через командную строку (CLI)»
-
-* **Выполнил:** Студент группы 23-СТ Дятлов А.В.
-* **Проверил:** Бровко Н.В.
-
-*Полоцк, 2026 г.*
+```
 
 ---
 
-## Цель работы
+## 1. Автоматизация сборки (Unity CLI)
 
-Освоение процесса автоматизированной компиляции и сборки проектов Unity в режиме командной строки (CLI) под платформу WebGL без запуска графического интерфейса редактора.
+Для сборки проекта без запуска графического интерфейса Unity используется C#-скрипт `BuildManager.cs`, расположенный в служебной директории `Assets/Editor/`.
 
----
+### Особенности реализации:
 
-## Этап 1. Подготовка проекта и создание C#-скрипта сборщика
+* **Сборка WebGL:** Автоматический запуск компиляции одной командой из PowerShell.
+* **Автономность:** Флаги `-batchmode` и `-nographics` позволяют собирать проект на серверах без графической системы и GPU.
+* **Контроль ошибок:** Коды завершения процесса (`0` — успех, `1` — ошибка) и логирование результатов в файл `build_webgl.log`.
 
-1. В редакторе Unity был загружен проект на базе шаблона **2D Platformer Microgame**.
-2. Для обеспечения совместимости билда с локальными веб-серверами в настройках проекта (`Edit → Project Settings → Player → WebGL → Publishing Settings`) параметр **Compression Format** был переключен со значения *Gzip* на *Disabled*.
-3. В директории `Assets/Editor/` создан C#-скрипт `BuildManager.cs`. Скрипт содержит статический метод `BuildWebGL()`, который считывает активные сцены из `Build Settings`, конфигурирует параметры `BuildPlayerOptions` и вызывает метод `BuildPipeline.BuildPlayer`.
+### Команда локального запуска:
 
-**Листинг 1 — Исходный код скрипта автоматизированной сборки (`Assets/Editor/BuildManager.cs`)**
+```powershell
+& "C:\Program Files\Unity\Hub\Editor\6000.4.2f1\Editor\Unity.exe" `
+  -batchmode -nographics `
+  -projectPath "B:\Works\ARPO\LAB1" `
+  -executeMethod BuildManager.BuildWebGL `
+  -quit -logFile build_webgl.log
 
-using System;
-using UnityEditor;
-using UnityEditor.Build.Reporting;
-using UnityEngine;
+```
 
-public static class BuildManager
-{
-    private static readonly string WebGLBuildPath = "Builds/WebGL";
+### Результаты сборки:
+<img width="900" height="364" alt="Снимок экрана 2026-10-06 141017" src="https://github.com/user-attachments/assets/39f74777-04ea-4974-81ac-884fc7174e5c" />
 
-    public static void BuildWebGL()
-    {
-        Debug.Log("[CI/CD] Запущен автоматический процесс сборки WebGL...");
+* **Запуск сборки через консоль и файл логов:**
+* **Запущенная WebGL-игра на локальном сервере:**
+<img width="1919" height="983" alt="Снимок экрана 2026-10-06 141525" src="https://github.com/user-attachments/assets/299d2b68-7199-4322-b2e2-e6a4d54860c5" />
 
-        string[] levels = GetScenes();
-        if (levels.Length == 0)
-        {
-            Debug.LogError("[CI/CD] Ошибка: В Настройках Сборки (Build Settings) не найдено ни одной активной сцены!");
-            ExitWithCode(1);
-            return;
-        }
 
-        BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions
-        {
-            scenes = levels,
-            locationPathName = WebGLBuildPath,
-            target = BuildTarget.WebGL,
-            options = BuildOptions.None
-        };
+## 2. CI/CD Пайплайн и Зеркалирование (GitHub Actions)
 
-        BuildReport report = BuildPipeline.BuildPlayer(buildPlayerOptions);
-        BuildSummary summary = report.summary;
+В проекте настроен автоматический рабочий процесс (`.github/workflows/main.yml`), который запускается при каждом коммите или слиянии (Merge) в ветку `main`.
 
-        if (summary.result == BuildResult.Succeeded)
-        {
-            Debug.Log("[CI/CD] УСПЕХ! WebGL билд успешно создан.");
-            Debug.Log($"[CI/CD] Время сборки: {summary.totalTime.TotalSeconds:F2} сек. Размер: {summary.totalSize} байт.");
-            ExitWithCode(0);
-        }
-        else
-        {
-            Debug.LogError($"[CI/CD] ОШИБКА СБОРКИ! Количество ошибок: {summary.totalErrors}");
-            ExitWithCode(1);
-        }
-    }
+### Структура пайплайна (Jobs):
 
-    private static string[] GetScenes()
-    {
-        var editorScenes = EditorBuildSettings.scenes;
-        int activeCount = 0;
-        foreach (var scene in editorScenes)
-        {
-            if (scene.enabled) activeCount++;
-        }
+1. **`sanity_check` (Диагностика):**
+* Клонирует исходный код проекта.
+* Проверяет наличие обязательных системных папок Unity (`ProjectSettings`, `Packages`).
+* Выполняет поиск C#-скриптов игры в каталоге `Assets/`.
 
-        string[] scenePaths = new string[activeCount];
-        int index = 0;
-        foreach (var scene in editorScenes)
-        {
-            if (scene.enabled)
-            {
-                scenePaths[index] = scene.path;
-                index++;
-            }
-        }
-        return scenePaths;
-    }
 
-    private static void ExitWithCode(int code)
-    {
-        if (Environment.CommandLine.Contains("-batchmode"))
-        {
-            EditorApplication.Exit(code);
-        }
-    }
-}
+2. **`mirror_repo` (Автоматическое зеркалирование):**
+* Запускается строго после успешного прохождения `sanity_check`.
+* Использует зашифрованный токен `BACKUP_TOKEN` (Personal Access Token).
+* Выкачивает полную историю коммитов (`fetch-depth: 0`).
+* Автоматически дублирует весь код и историю в резервный репозиторий `ARPO-LAB1-backup` с помощью `git push --force`.
+
+
+
+### Результаты работы CI/CD:
+
+* **Успешное выполнение задач в GitHub Actions:**
+* **Синхронизированный резервный репозиторий:**
 
 ---
-
-## Этап 2. Выполнение сборки через интерфейс командной строки (CLI)
-
-1. Редактор Unity был полностью закрыт.
-2. Запуск процесса сборки осуществлен из консоли PowerShell с использованием аргументов пакетного режима:
-* `-batchmode` — запуск Unity в фоновом режиме без GUI;
-* `-nographics` — отключение инициализации графического процессора;
-* `-executeMethod BuildManager.BuildWebGL` — автоматический вызов C#-метода;
-* `-quit` — завершение процесса по окончании работы;
-* `-logFile build_webgl.log` — перенаправление вывода в лог-файл.
-
-
-
-**Команда запуска в PowerShell:**
-
-& "C:\Program Files\Unity\Hub\Editor\6000.4.2f1\Editor\Unity.exe" -batchmode -nographics -projectPath "B:\Works\ARPO\LAB1" -executeMethod BuildManager.BuildWebGL -quit -logFile build_webgl.log
-
-
-3. В ходе анализа файла `build_webgl.log` зафиксированы итоговые показатели сборки:
-* **Время сборки:** 633.20 сек.
-* **Размер сборки:** 64 790 731 байт (~61.8 МБ).
-* **Итоговый статус:** `[CI/CD] УСПЕХ! WebGL билд успешно создан.`
-
-
-
----
-
-## Этап 3. Локальное тестирование и публикация проекта в Git
-
-1. Для предотвращения ошибок политики безопасности браузера (CORS) готовый билд из директории `Builds/WebGL` был развернут с помощью локального HTTP-сервера.
-2. В ходе тестирования подтверждена полная работоспособность WebGL-версии: игра загружается, графика и управление персонажем функционируют корректно.
-3. В корне проекта сформирован файл `.gitignore`, исключающий служебные каталоги (`Library/`, `Temp/`, `Builds/`) и лог-файлы.
-4. Инициализирован Git-репозиторий, созданы ветки `main` и `LR1`, сформирован Pull Request на GitHub и отправлен на рецензирование (Peer Review).
-
----
-
-## Ответы на контрольные вопросы
-
-1. **Зачем в команде запуска CLI использовать флаг `-nographics` и какую роль он сыграет при переносе пайплайна на удаленный сервер в облаке?**
-Флаг `-nographics` отключает инициализацию графического движка и видеокарты. На удаленных CI/CD серверах (например, GitHub Actions, GitLab CI) виртуальные машины работают в headless-режиме без графической оболочки и физической дискретной видеокарты. Флаг `-nographics` позволяет выполнять компиляцию проекта и сборку билда на таких серверах без ошибок инициализации графического API.
-2. **Что произойдет, если запустить консольную сборку проекта, в настройках Build Settings которого не выбрана ни одна сцена игры? Какая строка нашего кода обрабатывает эту ситуацию?**
-В этом случае метод `GetScenes()` вернет пустой массив строк (`levels.Length == 0`). Программа выполнит проверку `if (levels.Length == 0)`, выведет сообщение об ошибке `Debug.LogError("[CI/CD] Ошибка: В Настройках Сборки...")` и принудительно завершит процесс Unity с кодом ошибки `1` через вызов `ExitWithCode(1)`.
-3. **Почему класс `BuildManager` и его методы обязательно должны быть объявлены как `public static`?**
-Флаг `-executeMethod` вызывает метод из командной строки напрямую, когда редактор Unity еще не загрузил какую-либо сцену и не создал экземпляры объектов. Метод должен быть `static`, чтобы Unity могла вызвать его без создания объекта класса, и `public`, чтобы он был доступен для вызова из внешней среды редактора.
-
----
-
-## Вывод
-
-В ходе лабораторной работы освоены навыки автоматической сборки проектов Unity под платформу WebGL с использованием интерфейса командной строки (CLI). Написан скрипт `BuildManager.cs`, выполняющий компиляцию проекта в пакетном режиме, проанализированы логи сборки и успешно выполнено локальное тестирование готового WebGL-приложения. Полученные навыки необходимы для построения процессов непрерывной интеграции и развертывания (CI/CD).
 
