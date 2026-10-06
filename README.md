@@ -60,6 +60,7 @@
 
 
 ### Результаты работы CI/CD:
+<img width="1582" height="283" alt="image" src="https://github.com/user-attachments/assets/93c197bb-ea77-4f9e-8d5f-a09896e31197" />
 
 * **Успешное выполнение задач в GitHub Actions:**
 * **Синхронизированный резервный репозиторий:**
