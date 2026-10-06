@@ -67,8 +67,6 @@
 * **Синхронизированный резервный репозиторий:**
 <img width="1123" height="773" alt="image" src="https://github.com/user-attachments/assets/8b97fae1-a3d6-49c6-8c55-c01d7e837aa9" />
 
-Результаты работы CI/CD:
-Успешное выполнение задач в GitHub Actions:
 
 ## Структура репозитория
 
