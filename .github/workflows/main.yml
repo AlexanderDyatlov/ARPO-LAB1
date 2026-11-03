@@ -49,6 +49,7 @@ jobs:
         with:
           unityVersion: 6000.3.11f1
           testMode: all
+          targetPlatform: StandaloneLinux64
 
   # ЗАДАЧА 3: Автоматическое зеркалирование в резервный репозиторий
   mirror_repo:
