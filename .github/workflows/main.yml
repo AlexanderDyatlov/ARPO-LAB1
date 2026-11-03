@@ -44,7 +44,6 @@ jobs:
         run: |
           curl -SL -o game-ci.tar.gz https://github.com/game-ci/cli/releases/download/v0.1.72/game-ci-linux-x64.tar.gz
           tar xzf game-ci.tar.gz
-          ./game-ci
           echo "$PWD" >> $GITHUB_PATH
 
       - name: Run Unity Tests
