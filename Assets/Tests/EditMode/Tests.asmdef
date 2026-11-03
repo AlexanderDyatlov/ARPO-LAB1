@@ -1,0 +1,9 @@
+{
+    "name": "Tests",
+    "references": [
+        "GameAssembly"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ]
+}

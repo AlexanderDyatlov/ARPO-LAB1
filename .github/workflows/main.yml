@@ -24,9 +24,53 @@ jobs:
           find Assets/ -name "*Controller*.cs" -print || true
           find Assets/ -name "BuildManager.cs" -print || true
 
-  # ЗАДАЧА 2: Автоматическое зеркалирование в резервный репозиторий
-  mirror_repo:
+  # ЭТАП 2 (ЛР №4): Автоматический запуск тестов Unity
+  run_tests:
     needs: sanity_check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cache Library folder
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ hashFiles('Packages/packages-lock.json', 'Assets/**/*.asmdef') }}
+
+      - name: Install GameCI CLI
+        run: |
+          curl -SL -o game-ci.tar.gz https://github.com/game-ci/cli/releases/download/v0.1.72/game-ci-linux-x64.tar.gz
+          tar xzf game-ci.tar.gz
+          ./game-ci
+          echo "$PWD" >> $GITHUB_PATH
+
+      - name: Run Unity Tests
+        run: |
+          game-ci test --docker --dockerShmSize=1025m \
+            --engineTestPlatforms='playmode;editmode;COMBINE RESULTS' \
+            --engineVersion=6000.3.11f1 --coverageEnabled=false \
+            --artifactsPath=artifacts \
+            --dockerIsolationMode=default \
+            --containerRegistryRepository=unityci/editor \
+            --containerRegistryImageVersion=3
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: artifacts/
+
+  # ЗАДАЧА 3: Автоматическое зеркалирование в резервный репозиторий
+  mirror_repo:
+    needs: run_tests
     if: github.repository == 'AlexanderDyatlov/ARPO-LAB1'
     runs-on: ubuntu-latest
     steps:
@@ -55,9 +99,9 @@ jobs:
           git push --force https://x-access-token:${BACKUP_TOKEN}@github.com/AlexanderDyatlov/ARPO-LAB1-backup.git main
           echo "=== Код успешно продублирован ===" 
 
-  # ЗАДАЧА 3: Автоматическая сборка Docker-образа в облако GHCR
+  # ЗАДАЧА 4: Автоматическая сборка Docker-образа в облако GHCR (теперь зависит от run_tests)
   build_docker_image:
-    needs: sanity_check
+    needs: run_tests
     runs-on: ubuntu-latest
     permissions:
       contents: read
