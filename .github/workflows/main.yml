@@ -5,7 +5,6 @@ on:
     branches: [ "main" ]
 
 jobs:
-  # ЗАДАЧА 1: Быстрая диагностика структуры проекта (Sanity Check)
   sanity_check:
     runs-on: ubuntu-latest
     steps:
@@ -18,13 +17,6 @@ jobs:
           if [ -d "ProjectSettings" ]; then echo "ProjectSettings найден."; else echo "Ошибка!" && exit 1; fi
           if [ -d "Packages" ]; then echo "Packages найден."; else echo "Ошибка!" && exit 1; fi
 
-      - name: Locate 2D Platformer Scripts
-        run: |
-          echo "=== Поиск C# скриптов в папке Assets ==="
-          find Assets/ -name "*Controller*.cs" -print || true
-          find Assets/ -name "BuildManager.cs" -print || true
-
-  # ЭТАП 2 (ЛР №4): Автоматический запуск тестов Unity
   run_tests:
     needs: sanity_check
     runs-on: ubuntu-latest
@@ -40,17 +32,27 @@ jobs:
           path: Library
           key: Library-${{ hashFiles('Packages/packages-lock.json', 'Assets/**/*.asmdef') }}
 
+      - name: Install GameCI CLI
+        run: |
+          curl -SL -o game-ci.tar.gz https://github.com/game-ci/cli/releases/download/v0.1.72/game-ci-linux-x64.tar.gz
+          tar xzf game-ci.tar.gz
+          echo "$PWD" >> $GITHUB_PATH
+
       - name: Run Unity Tests
-        uses: game-ci/unity-test-runner@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          unityVersion: 6000.3.11f1
-          testMode: all
+        run: |
+          game-ci test --docker --dockerShmSize=1025m --engine=unity --testPlatforms=playmode;editmode;COMBINE_RESULTS --engineVersion=6000.3.11f1 --coverageEnabled=false --artifactsPath=artifacts --dockerIsolationMode=default --containerRegistryRepository=unityci/editor --containerRegistryImageVersion=3
 
-  # ЗАДАЧА 3: Автоматическое зеркалирование в резервный репозиторий
+      - name: Upload Test Results Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: artifacts
+
   mirror_repo:
     needs: run_tests
     if: github.repository == 'AlexanderDyatlov/ARPO-LAB1'
@@ -62,26 +64,12 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Verify token is set
-        env:
-          BACKUP_TOKEN: ${{ secrets.BACKUP_TOKEN }}
-        run: |
-          if [ -z "$BACKUP_TOKEN" ]; then
-            echo "ОШИБКА: BACKUP_TOKEN is empty!"
-            exit 1
-          else
-            echo "=== BACKUP_TOKEN is set (length: ${#BACKUP_TOKEN}) ==="
-          fi
-
       - name: Push to Backup Repository
         env:
           BACKUP_TOKEN: ${{ secrets.BACKUP_TOKEN }}
         run: |
-          echo "=== Начало процесса зеркалирования ==="
           git push --force https://x-access-token:${BACKUP_TOKEN}@github.com/AlexanderDyatlov/ARPO-LAB1-backup.git main
-          echo "=== Код успешно продублирован ===" 
 
-  # ЗАДАЧА 4: Автоматическая сборка Docker-образа в облако GHCR (теперь зависит от run_tests)
   build_docker_image:
     needs: run_tests
     runs-on: ubuntu-latest
@@ -100,7 +88,6 @@ jobs:
             touch Builds/WebGL/Build/game.framework.js.gz
             touch Builds/WebGL/Build/game.wasm.gz
             touch Builds/WebGL/Build/game.data.gz
-            echo "Создана временная структура сжатых файлов для сборщика Docker."
           fi
 
       - name: Log in to GitHub Container Registry
