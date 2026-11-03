@@ -40,32 +40,15 @@ jobs:
           path: Library
           key: Library-${{ hashFiles('Packages/packages-lock.json', 'Assets/**/*.asmdef') }}
 
-      - name: Install GameCI CLI
-        run: |
-          curl -SL -o game-ci.tar.gz https://github.com/game-ci/cli/releases/download/v0.1.72/game-ci-linux-x64.tar.gz
-          tar xzf game-ci.tar.gz
-          echo "$PWD" >> $GITHUB_PATH
-
       - name: Run Unity Tests
-        run: |
-          game-ci test --docker --dockerShmSize=1025m \
-            --engineTestPlatforms='playmode;editmode;COMBINE RESULTS' \
-            --engineVersion=6000.3.11f1 --coverageEnabled=false \
-            --artifactsPath=artifacts \
-            --dockerIsolationMode=default \
-            --containerRegistryRepository=unityci/editor \
-            --containerRegistryImageVersion=3
+        uses: game-ci/unity-test-runner@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-
-      - name: Upload test artifacts
-        uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: test-results
-          path: artifacts/
+          unityVersion: 6000.3.11f1
+          testMode: all
 
   # ЗАДАЧА 3: Автоматическое зеркалирование в резервный репозиторий
   mirror_repo:
