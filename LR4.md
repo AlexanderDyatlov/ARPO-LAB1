@@ -1,10 +1,10 @@
 
 # Отчёт по лабораторной работе №4
-## «Автоматизация тестирования (Unity Test Runner) и интеграция Quality Gate в CI/CD»
+## Автоматизация тестирования (Unity Test Runner) в CI/CD
 
 **Студент:** Александр Дятлов  
 **Учебная дисциплина:** Архитектура программного обеспечения (АРПО)  
-**Индивидуальный вариант:** №2  
+**Вариант:** №2  
 - **Тестируемая механика:** Компонент здоровья `Health` (`Assets/Scripts/Mechanics/Health.cs`).  
 - **Тип теста:** Интеграционный тест (`PlayMode`).  
 - **Цель варианта:** Проверить, что метод `Decrement()` уменьшает значение текущего здоровья персонажа (`currentHP`) ровно на 1 единицу.
@@ -13,18 +13,14 @@
 
 ## 1. Цель работы и теоретическая вводная
 
-**Цель:** Настроить автоматический запуск двух типов тестов Unity (EditMode и PlayMode) в облачном пайплайн-среде GitHub Actions и связать их с этапами сборки и публикации Docker-контейнера. Тесты должны выполнять роль **Quality Gate (гейта качества)** — блокировать сборку и публикацию приложения при наличии ошибок в коде.
+**Цель:** Настроить автоматический запуск Unity-тестов (EditMode и PlayMode) в облачном пайплайне так, чтобы облачная компиляция игры и сборка Docker-образа выполнялись только при успешном прохождении всех тестов.
 
-### Теоретические основы:
-1. **EditMode тесты:** Модульные тесты, запускаемые в среде редактора Unity без включения симуляции физики, кадров и времени (`Time.time`). Используются для проверки конфигурации сцен, наличия компонентов, тегов, корректности ассетов и настроек `Build Settings`.
-2. **PlayMode тесты:** Интеграционные тесты, запускающие фоновую симуляцию игрового движка. Позволяют проверять логику объектов в динамике (получение урона, движение, физические взаимодействия, коллизии) с использованием сопрограмм (`IEnumerator`) и задержек по кадрам (`yield return null`).
-3. **Assembly Definitions (`.asmdef`):** Механизм Unity для разделения кодовой базы на изолированные сборки (скомпилированные DLL). Они предотвращают попадание тестовых зависимостей (`NUnit`, `TestRunner`) в финальный релизный билд игры и сокращают время повторной компиляции.
 
 ---
 
 ## 2. Разделение кодовой базы и настройка Assembly Definitions
 
-Для корректной работы тестов в проекте создана трехзвенная структура сборок:
+Для корректной работы тестов в проекте создана структура сборок:
 
 ```text
 Assets/
@@ -299,7 +295,7 @@ jobs:
         run: |
           if [ -d "ProjectSettings" ]; then echo "OK"; else exit 1; fi
 
-  # ЭТАП ТЕСТИРОВАНИЯ (Quality Gate)
+  # тестирование
   run_tests:
     needs: sanity_check
     runs-on: ubuntu-latest
@@ -316,7 +312,7 @@ jobs:
           path: Library
           key: Library-${{ hashFiles('Packages/packages-lock.json', 'Assets/**/*.asmdef') }}
 
-      # Установка официального CLI GameCI
+      # Установка официального CLI 
       - name: Install GameCI CLI
         run: |
           curl -SL -o game-ci.tar.gz [https://github.com/game-ci/cli/releases/download/v0.1.72/game-ci-linux-x64.tar.gz](https://github.com/game-ci/cli/releases/download/v0.1.72/game-ci-linux-x64.tar.gz)
@@ -324,7 +320,7 @@ jobs:
           ./game-ci
           echo "$PWD" >> $GITHUB_PATH
 
-      # Прямой запуск тестов в Headless-контейнере Unity 6
+      # запуск тестов
       - name: Run Unity Tests
         run: |
           game-ci test --docker --dockerShmSize=1025m \
@@ -347,7 +343,7 @@ jobs:
           name: test-results
           path: artifacts/
 
-  # ЭТАП ЗЕРКАЛИРОВАНИЯ (Выполняется ТОЛЬКО после успешных тестов)
+  # зеркало
   mirror_repo:
     needs: run_tests
     if: github.repository == 'AlexanderDyatlov/ARPO-LAB1'
@@ -362,7 +358,7 @@ jobs:
         run: |
           git push --force https://x-access-token:${BACKUP_TOKEN}@[github.com/AlexanderDyatlov/ARPO-LAB1-backup.git](https://github.com/AlexanderDyatlov/ARPO-LAB1-backup.git) main
 
-  # ЭТАП ПУБЛИКАЦИИ DOCKER (Выполняется ТОЛЬКО после успешных тестов)
+  # докер
   build_docker_image:
     needs: run_tests
     runs-on: ubuntu-latest
