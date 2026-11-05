@@ -57,7 +57,7 @@ jobs:
           game-ci test --docker --dockerShmSize=1025m \
             --engine=unity \
             --testPlatforms='playmode;editmode;COMBINE_RESULTS' \
-            --engineVersion=6000.3.11f1 \
+            --engineVersion=6000.4.2f1 \
             --coverageEnabled=false \
             --artifactsPath=artifacts \
             --dockerIsolationMode=default \
