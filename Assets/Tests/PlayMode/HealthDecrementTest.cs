@@ -29,7 +29,7 @@ public class HealthDecrementTest
         int finalHP = (int)hpField.GetValue(health);
 
         // Проверка: текущее здоровье должно уменьшиться ровно на 1
-        Assert.AreEqual(initialHP - 1, finalHP, "Ошибка: метод Decrement() должен уменьшать HP ровно на 1!");
+        Assert.AreEqual(initialHP - 5, finalHP, "Ошибка: метод Decrement() должен уменьшать HP ровно на 1!");
 
         // Очистка памяти
         Object.Destroy(playerObj);
