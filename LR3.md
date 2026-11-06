@@ -107,6 +107,8 @@ docker run -d -p 8080:80 --name unity_compressed_container platformer-compressed
 
 * **GitHub Actions:** Пайплайн успешно завершает все три задачи (`sanity_check`, `mirror_repo`, `build_docker_image`) с зелёным статусом.
 * **GHCR Packages:** Готовый Docker-образ успешно опубликован и доступен в профиле репозитория GitHub Packages (`ghcr.io/alexanderdyatlov/platformer-game`).
+* <img width="869" height="338" alt="image" src="https://github.com/user-attachments/assets/a49c6b6c-7b0b-46c1-96e7-8483adc0a5ca" />
+
 
 ---
 
