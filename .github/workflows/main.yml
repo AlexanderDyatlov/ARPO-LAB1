@@ -69,7 +69,7 @@ jobs:
           name: test-results
           path: artifacts/
 
-    build_game:
+  build_game:
     needs: run_tests
     runs-on: ubuntu-latest
     steps:
