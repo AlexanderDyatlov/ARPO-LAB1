@@ -69,7 +69,7 @@ jobs:
           name: test-results
           path: artifacts/
 
-  build_game:
+    build_game:
     needs: run_tests
     runs-on: ubuntu-latest
     steps:
@@ -84,17 +84,33 @@ jobs:
           path: Library
           key: Library-Build-${{ hashFiles('Packages/packages-lock.json', 'Assets/**/*.asmdef') }}
 
+      - name: Install GameCI CLI
+        run: |
+          URL1="https://github.com/gameci/cli/releases/download/v0.1.72/game-ci-linux-x64.tar.gz"
+          URL2="https://github.com/game-ci/cli/releases/download/v0.1.72/game-ci-linux-x64.tar.gz"
+          curl -sSL -f -o game-ci.tar.gz "$URL1" || curl -sSL -f -o game-ci.tar.gz "$URL2"
+          tar xzf game-ci.tar.gz ./game-ci
+          echo "$PWD" >> $GITHUB_PATH
+
       - name: Build WebGL Player
-        uses: game-ci/unity-builder@v4
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          targetPlatform: WebGL
-          buildMethod: BuildManager.BuildWebGL
-          unityVersion: 6000.4.2f1
-          versioning: None
+        run: |
+          game-ci build \
+            --engine=unity \
+            --engineVersion=6000.4.2f1 \
+            --targetPlatform=WebGL \
+            --buildMethod=BuildManager.BuildWebGL \
+            --versioningStrategy=None \
+            --dockerIsolationMode=default \
+            --containerRegistryRepository=unityci/editor \
+            --containerRegistryImageVersion=3 \
+            --unity-email "$UNITY_EMAIL" \
+            --unity-password "$UNITY_PASSWORD"
+
+      - name: Fix file owner
+        run: sudo chown -R "$(id -u):$(id -g)" Builds || true
 
       - name: Upload WebGL Artifact
         uses: actions/upload-artifact@v4
