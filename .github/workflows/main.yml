@@ -95,7 +95,11 @@ jobs:
           echo "$PWD" >> $GITHUB_PATH
 
       - name: Build WebGL Player
+        # Игра собирается успешно, но CLI падает на финальной проверке (возврат лицензии).
+        # Поэтому шаг не роняет задачу, а наличие билда проверяет следующий шаг.
+        continue-on-error: true
         env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         run: |
@@ -113,6 +117,11 @@ jobs:
             --unity-email "$UNITY_EMAIL" \
             --unity-password "$UNITY_PASSWORD" \
             --verbose 2>&1 | tee build.log
+
+      - name: Verify WebGL build exists
+        run: |
+          test -f Builds/WebGL/WebGL/index.html || { echo "Билд не найден - сборка реально упала"; exit 1; }
+          ls -la Builds/WebGL/WebGL Builds/WebGL/WebGL/Build
 
       - name: Show errors from log
         if: always()
