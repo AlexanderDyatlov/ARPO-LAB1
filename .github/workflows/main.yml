@@ -40,9 +40,8 @@ jobs:
 
       - name: Install GameCI CLI
         run: |
-          LATEST_URL=$(curl -s https://api.github.com/repos/game-ci/cli/releases/latest | grep -o '"browser_download_url": *"[^"]*linux-x64\.tar\.gz"' | head -n 1 | cut -d '"' -f 4)
-          echo "Downloading from: $LATEST_URL"
-          curl -sSL -f -o game-ci.tar.gz "$LATEST_URL"
+          curl -fsSL --retry 3 -o game-ci.tar.gz \
+            https://github.com/game-ci/cli/releases/latest/download/game-ci-linux-x64.tar.gz
           tar xzf game-ci.tar.gz
           chmod +x game-ci
           echo "$PWD" >> $GITHUB_PATH
