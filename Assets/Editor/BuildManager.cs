@@ -24,11 +24,16 @@ public static class BuildManager
             return;
         }
 
-        // 2. Конфигурируем параметры сборки
+        // 2. Путь сборки: GameCI передает его аргументом -customBuildPath,
+        //    при локальном запуске используем путь по умолчанию
+        string buildPath = GetArg("-customBuildPath") ?? WebGLBuildPath;
+        Debug.Log($"[CI/CD] Путь сборки: {buildPath}");
+
+        // 3. Конфигурируем параметры сборки
         BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions
         {
             scenes = levels,
-            locationPathName = WebGLBuildPath,
+            locationPathName = buildPath,
             target = BuildTarget.WebGL,
             options = BuildOptions.None // Для отладочной сборки можно использовать BuildOptions.Development
         };
@@ -49,6 +54,19 @@ public static class BuildManager
             Debug.LogError($"[CI/CD] ОШИБКА СБОРКИ! Количество ошибок: {summary.totalErrors}");
             ExitWithCode(1);
         }
+    }
+
+    /// <summary>
+    /// Читает значение аргумента командной строки Unity (например, -customBuildPath путь)
+    /// </summary>
+    private static string GetArg(string name)
+    {
+        string[] args = Environment.GetCommandLineArgs();
+        for (int i = 0; i < args.Length - 1; i++)
+        {
+            if (args[i] == name) return args[i + 1];
+        }
+        return null;
     }
 
     /// <summary>

@@ -134,7 +134,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: WebGL-Build
-          path: Builds/WebGL
+          path: Builds/WebGL/WebGL
 
   mirror_repo:
     needs: run_tests
