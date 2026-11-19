@@ -39,13 +39,13 @@ jobs:
           key: Library-v3-6000-4-${{ hashFiles('Packages/packages-lock.json', 'Assets/**/*.asmdef') }}
 
       - name: Install GameCI CLI
-          run: |
-            LATEST_URL=$(curl -s https://api.github.com/repos/game-ci/cli/releases/latest | grep -o '"browser_download_url": *"[^"]*linux-x64\.tar\.gz"' | head -n 1 | cut -d '"' -f 4)
-            echo "Downloading from: $LATEST_URL"
-            curl -sSL -f -o game-ci.tar.gz "$LATEST_URL"
-            tar xzf game-ci.tar.gz
-            chmod +x game-ci
-            echo "$PWD" >> $GITHUB_PATH
+        run: |
+          LATEST_URL=$(curl -s https://api.github.com/repos/game-ci/cli/releases/latest | grep -o '"browser_download_url": *"[^"]*linux-x64\.tar\.gz"' | head -n 1 | cut -d '"' -f 4)
+          echo "Downloading from: $LATEST_URL"
+          curl -sSL -f -o game-ci.tar.gz "$LATEST_URL"
+          tar xzf game-ci.tar.gz
+          chmod +x game-ci
+          echo "$PWD" >> $GITHUB_PATH
 
       - name: Run Unity Tests
         env:
@@ -87,10 +87,11 @@ jobs:
 
       - name: Install GameCI CLI
         run: |
-          URL1="https://github.com/gameci/cli/releases/download/v0.1.72/game-ci-linux-x64.tar.gz"
-          URL2="https://github.com/gameci/cli/releases/download/v0.1.72/game-ci-linux-x64.tar.gz"
-          curl -sSL -f -o game-ci.tar.gz "$URL1" || curl -sSL -f -o game-ci.tar.gz "$URL2"
-          tar xzf game-ci.tar.gz ./game-ci
+          LATEST_URL=$(curl -s https://api.github.com/repos/game-ci/cli/releases/latest | grep -o '"browser_download_url": *"[^"]*linux-x64\.tar\.gz"' | head -n 1 | cut -d '"' -f 4)
+          echo "Downloading from: $LATEST_URL"
+          curl -sSL -f -o game-ci.tar.gz "$LATEST_URL"
+          tar xzf game-ci.tar.gz
+          chmod +x game-ci
           echo "$PWD" >> $GITHUB_PATH
 
       - name: Build WebGL Player
