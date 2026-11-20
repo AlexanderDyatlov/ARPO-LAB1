@@ -201,6 +201,8 @@ Error: Process completed with exit code 1.
 4. **Ветка `gh-pages`.** В неё выгружены `index.html` и папки `Build`, `TemplateData`.
 5. **Игра на Pages.** По ссылке <https://alexanderdyatlov.github.io/ARPO-LAB1/> игра загружается и открывается.
    > <img width="1501" height="895" alt="image" src="https://github.com/user-attachments/assets/83f6ece6-971a-43f3-9308-8d81eb618415" />
+6. Сеть и консоль (F12). index.html и файлы Build/* загружаются с кодом 200, ошибок распаковки в консоли нет (работает Decompression Fallback).
+<img width="394" height="562" alt="Снимок экрана 2026-11-20 104646" src="https://github.com/user-attachments/assets/06fdd230-1f94-4d2b-b2d8-5aa93ef11217" />
 
 7. **Docker-образ.** В Packages профиля GitHub опубликован `platformer-game` с тегами `latest` и `sha` коммита.
    > <img width="818" height="361" alt="image" src="https://github.com/user-attachments/assets/750cc6b7-4394-4164-ab39-2507c39541fb" />
