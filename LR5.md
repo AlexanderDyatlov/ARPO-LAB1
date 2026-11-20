@@ -34,7 +34,8 @@ grep -n "webGLCompressionFormat\|webGLDecompressionFallback" ProjectSettings/Pro
 
 Ожидаемый результат: `webGLCompressionFormat: 0` (Gzip) и `webGLDecompressionFallback: 1`.
 
-> Скриншот: вывод команды `grep` или окно Publishing Settings с включённой галочкой.
+> <img width="707" height="69" alt="image" src="https://github.com/user-attachments/assets/313238b9-5575-4b1e-b3a5-a7735fbe2f34" />
+
 
 ---
 
@@ -165,7 +166,8 @@ private static string GetArg(string name)
 
 Задача `deploy_to_pages` только публикует билд в ветку `gh-pages`, но не включает хостинг. Pages включён один раз вручную: `Settings -> Pages -> Source: Deploy from a branch -> Branch: gh-pages, / (root) -> Save`.
 
-> Скриншот: раздел `Settings -> Pages` с зелёной плашкой и ссылкой на сайт.
+> <img width="719" height="315" alt="Снимок экрана 2026-11-20 090450" src="https://github.com/user-attachments/assets/5b9dc8ed-8b40-42c6-a6e1-f803dcb07bbc" />
+
 
 ---
 
@@ -192,17 +194,17 @@ Error: Process completed with exit code 1.
 ## 7. Результаты выполнения
 
 1. **Пайплайн.** Последний прогон завершился со статусом **Success** за 23 мин 23 с. Все задачи зелёные: `sanity_check`, `run_tests`, `build_game`, `mirror_repo`, `build_docker_image`, `deploy_to_pages`, `notify`. Задача `build_game` запустилась после успешных `run_tests`.
-   > Скриншот: граф прогона на вкладке Actions.
+   > <img width="1287" height="262" alt="image" src="https://github.com/user-attachments/assets/e63dc26d-2719-4870-8df7-305b070d99e1" />
+
 2. **Лог сборки.** В логе `build_game` присутствуют строки `[CI/CD] УСПЕХ! WebGL билд успешно создан.` с временем и размером. Для одного из прогонов: 728,31 с и 20 366 479 байт. Это доказывает, что компиляция выполнена методом `BuildWebGL` из ЛР №1, а не дефолтной сборкой.
-   > Скриншот: строки `[CI/CD]` в логе.
 3. **Артефакты.** Сформированы `WebGL-Build` (около 18,9 МБ), `build-log` и `test-results`.
 4. **Ветка `gh-pages`.** В неё выгружены `index.html` и папки `Build`, `TemplateData`.
 5. **Игра на Pages.** По ссылке <https://alexanderdyatlov.github.io/ARPO-LAB1/> игра загружается и открывается.
-   > Скриншот: работающая игра в браузере.
-6. **Сеть и консоль (F12).** `index.html` и файлы `Build/*` загружаются с кодом 200, ошибок распаковки в консоли нет (работает Decompression Fallback).
-   > Скриншот: вкладка Network.
+   > <img width="1501" height="895" alt="image" src="https://github.com/user-attachments/assets/83f6ece6-971a-43f3-9308-8d81eb618415" />
+
 7. **Docker-образ.** В Packages профиля GitHub опубликован `platformer-game` с тегами `latest` и `sha` коммита.
-   > Скриншот: страница пакета. Проверка локально: `docker run -d -p 8080:80 ghcr.io/alexanderdyatlov/platformer-game:latest`, затем `curl -I -H "Accept-Encoding: gzip" http://localhost:8080/Build/<файл>.js.gz`.
+   > <img width="818" height="361" alt="image" src="https://github.com/user-attachments/assets/750cc6b7-4394-4164-ab39-2507c39541fb" />
+
 
 ---
 
