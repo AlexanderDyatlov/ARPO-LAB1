@@ -21,7 +21,8 @@ Webhook (обратный вызов) — push-механизм: система 
 2. В личном чате с ботом отправлена команда `/start`: бот не может написать первым.
 3. Запросом `https://api.telegram.org/bot<TOKEN>/getUpdates` получен идентификатор чата (`result[].message.chat.id`).
 
-> Скриншот: чат с BotFather (токен закрасить).
+> <img width="496" height="760" alt="image" src="https://github.com/user-attachments/assets/72282165-1e51-4f55-86ef-d5220a77b0d9" />
+
 
 ---
 
@@ -36,7 +37,8 @@ Webhook (обратный вызов) — push-механизм: система 
 
 В логах значения автоматически маскируются звёздочками.
 
-> Скриншот: список секретов репозитория (значения GitHub не показывает).
+> <img width="742" height="258" alt="image" src="https://github.com/user-attachments/assets/8452fc31-4fba-4c6b-ad4d-91cfe8111588" />
+
 
 ---
 
@@ -104,13 +106,17 @@ Webhook (обратный вызов) — push-механизм: система 
 
 После пуша и завершения прогона на телефон пришло сообщение с текстом «Сборка ARPO-LAB1 завершена успешно», именем автора коммита, ссылкой на игру и ссылкой на прогон.
 
-> Скриншот: сообщение в Telegram (на телефоне).
+> <img width="415" height="149" alt="image" src="https://github.com/user-attachments/assets/413f32e2-77d0-4a86-8245-9a24bb3acd1e" />
+
 
 ### 5.2. Аварийный сценарий
 
 > **Выполнить и описать перед сдачей.** Временно внести ошибку в шаг `Check Unity Directories` (например, заменить `ProjectSettings` на несуществующую папку), сделать пуш и убедиться, что пришло сообщение вида «Сборка ARPO-LAB1 упала на задаче sanity_check» с автором и ссылкой на лог, а сама задача `notify` осталась зелёной. После проверки вернуть исправленный `main.yml` и сделать пуш.
 >
-> Скриншоты: сообщение о падении в Telegram и прогон с красным `sanity_check` и зелёным `notify`.
+> <img width="498" height="636" alt="image" src="https://github.com/user-attachments/assets/e5a3ea03-1328-46e4-958d-ea11ad9d4139" />
+<img width="1240" height="416" alt="image" src="https://github.com/user-attachments/assets/fb8c13d0-a9e6-400e-b3d9-e3b4648ba622" />
+
+
 
 ---
 
